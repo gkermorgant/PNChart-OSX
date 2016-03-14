@@ -63,6 +63,8 @@
 @property (nonatomic, strong) NSString *yLabelFormat;
 
 - (void)setXLabels:(NSArray *)xLabels withWidth:(CGFloat)width;
+- (void)drawYAxisWithXOrigin:(CGFloat)xOrigin;
+- (void)showValueLabelAtLineIndex:(NSInteger)lineIndex andPointIndex:(NSInteger)pointIndex;
 
 /**
  * Update Chart Value
