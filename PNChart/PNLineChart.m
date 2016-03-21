@@ -13,6 +13,8 @@
 #import "PNLineChartDataItem.h"
 #import "NSBezierPath+CGPath.h"
 #import "PNBasicElements.h"
+#import "MyHomeMonitor-Bridging-Header.h"
+#import "MyHomeMonitor-Swift.h"
 
 
 @interface PNLineChart ()
@@ -28,7 +30,8 @@
 @property (nonatomic) NSMutableArray *horizontalHyphensArray;
 @property (nonatomic) NSMutableArray *verticalHyphensArray;
 
-@property (nonatomic) NSTextField *shownTextField;
+@property (nonatomic) PNChartLabel *shownLabel;
+@property (nonatomic) PNChartLabel *yAxisUnitLabel;
 
 @end
 
@@ -106,7 +109,7 @@
         
         while (num > 0)
         {
-            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(0.0 + xOffset, (_chartMargin + (index + 1) * yStepHeight - _yLabelHeight / 2.0), (NSInteger)_chartMargin, (NSInteger)_yLabelHeight)];
+            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(0.0 + xOffset, (_chartMargin + (index + 1) * yStepHeight - _yLabelHeight / 2.0) + 30, (NSInteger)_chartMargin, (NSInteger)_yLabelHeight)];
             [label setAlignment:NSRightTextAlignment];
             label.stringValue = [NSString stringWithFormat:yLabelFormat, _yValueMin + (yStep * index)];
             [self setCustomStyleForYLabel:label];
@@ -316,10 +319,11 @@
     CGRect rect = CGRectMake(relatedPoint.x - 50, relatedPoint.y - 30, 100, 50);
     CGFloat yValue = chartData.getData(pointIndex).y;
     
-    PNChartLabel *yLabel = [[PNChartLabel alloc] initWithFrame:rect];
-    yLabel.stringValue = [NSString stringWithFormat:@"%.1f", yValue];
-    [self setCustomStyleForYLabel:yLabel];
-    [self addSubview:yLabel];
+    [self.shownLabel removeFromSuperview];
+    self.shownLabel = [[PNChartLabel alloc] initWithFrame:rect];
+    self.shownLabel.stringValue = [NSString stringWithFormat:@"%.1f %@", yValue, [MHMUtils currentDataUnit]];
+    [self setCustomStyleForYLabel:self.shownLabel];
+    [self addSubview:self.shownLabel];
 }
 
 - (void)drawYAxisWithXOrigin:(CGFloat)xOrigin
@@ -340,7 +344,7 @@
     CGRect minRect = ((PNChartLabel *)[_yChartLabels firstObject]).frame;
     CGRect maxRect = ((PNChartLabel *)[_yChartLabels lastObject]).frame;
     
-    [yAxisLine moveToPoint: CGPointMake(xOrigin, minRect.origin.y - 80)];
+    [yAxisLine moveToPoint: CGPointMake(xOrigin, minRect.origin.y - 110)];
     [yAxisLine lineToPoint: CGPointMake(xOrigin, maxRect.origin.y + 50)];
     
     self.yAxisLayer.strokeColor = [PNBlack CGColor];
@@ -379,6 +383,13 @@
     [CATransaction commit];
     
     [self setYLabels:self.chartData atXOffset:xOrigin - 50.0];
+    
+    [self.yAxisUnitLabel removeFromSuperview];
+    CGRect rect = CGRectMake(xOrigin - 20, maxRect.origin.y - 30, 100, 80);
+    self.yAxisUnitLabel = [[PNChartLabel alloc] initWithFrame:rect];
+    self.yAxisUnitLabel.stringValue = [NSString stringWithFormat:@"( %@ )", [MHMUtils currentDataUnit]];
+    [self setCustomStyleForYLabel:self.yAxisUnitLabel];
+    [self addSubview:self.yAxisUnitLabel];
 }
 
 - (void)drawXAxisWithYOrigin:(CGFloat)yOrigin
